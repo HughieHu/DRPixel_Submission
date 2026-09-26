@@ -4,19 +4,25 @@ Visual deep research over scientific documents. An agent issues searches against
 corpus of rendered pages, reads the page images it retrieves, and answers questions
 whose evidence lives in figures, tables and equations rather than in running text.
 
-This repository accompanies the paper (under review). It is currently a
-**placeholder** — nothing has been released yet.
+This repository accompanies the paper (under review).
 
-## Planned contents
+## Contents
 
-| path | contents |
+[`supplement/`](supplement/) — the programs behind the paper. Code only: no corpus, no
+page images, no benchmark questions, no training trajectories, no checkpoints.
+
+| path | |
 |---|---|
-| `bench/` | DRPixelBench: questions, reference answers, and page-level evidence annotations |
-| `corpus/` | corpus construction and index building (99,055 documents / 1,062,153 pages) |
-| `agent/` | the search harness and retrieval tools |
-| `train/` | per-step counterfactual credit weighting and the fine-tuning recipe |
-| `eval/` | evaluation and grading scripts |
+| [`supplement/agent/`](supplement/agent/) | the search agent: harness, provider adapters, tool configuration, run driver |
+| [`supplement/corpus/`](supplement/corpus/) | retrieval: document access, index loading, the three retrievers, path preflight |
+| [`supplement/eval/`](supplement/eval/) | the two judges and the run health checks |
+| [`supplement/train/`](supplement/train/) | per-step counterfactual credit, the mediation gate, and the training/merge/eval jobs |
 
-## Status
+See [`supplement/README.md`](supplement/README.md) for what each file does and
+[`supplement/.env.example`](supplement/.env.example) for the configuration each component
+expects. All credentials and private endpoints were removed before release.
 
-Placeholder. Code, data and model weights will be added here.
+## Still to come
+
+The benchmark (questions, reference answers, page-level evidence annotations), the corpus
+build for the 99,055-document / 1,062,153-page collection, and model weights.
