@@ -2,7 +2,7 @@ import json, bisect, glob
 
 SHARDS = sorted(glob.glob("/path/to/vldr/cfw_v3_full.shard*.jsonl"))
 OUT    = "/path/to/work/sft_train_cfwV3.jsonl"
-Q_THR, T_THR, MAXW = 1.0, 0.0, 2.0
+Q_THR, T_THR, MAXW = 0.0, 0.0, 2.0
 
 recs = []
 for sh in SHARDS:
