@@ -1,15 +1,3 @@
-"""Next-action counterfactual credit for THINK segments.
-
-For each search-step assistant message (think + call_tool in one message):
-  na_think[i] = logP(action_seg | prefix, think_i present)
-              - logP(action_seg | prefix, think_i ablated)
-i.e. how much this step's reasoning helps produce THIS step's query -- the
-mediation-corrected credit (deletion-LOO against the gold answer lets think's
-contribution leak into the query it produced; here the query IS the target).
-
-Scoring model / data format / resume identical to compute_cfw_v3_multigpu.py.
-Writes `na_think` per assistant message alongside the untouched original fields.
-"""
 import json, os, re, argparse
 import torch
 
@@ -45,16 +33,10 @@ def to_parts(content, img_iter):
 EMPTY_THINK = "<think>\n\n</think>\n\n"
 
 def _base(prefix_pmsgs):
-    """Generation prompt WITHOUT the auto-opened <think>: Qwen3's template ends the
-    generation prompt with '<think>\n', so we strip it and supply the think block
-    ourselves -- otherwise prefix and full sequence disagree by one tag."""
     g = proc.apply_chat_template(prefix_pmsgs, tokenize=False, add_generation_prompt=True)
     return g[:-len("<think>\n")] if g.endswith("<think>\n") else g
 
 def score_seg(base, pre_text, target_text, images):
-    """logP(target_text | base + pre_text), summed over target tokens. Strings are
-    concatenated from one shared base so both conditions tokenize identically up to
-    pre_text."""
     from PIL import Image
     ims = [Image.open(q).convert("RGB") for q in images] if images else None
     text_pref = base + pre_text
@@ -73,12 +55,10 @@ def process(rec):
     imgs = [rimg(p) for p in rec.get("images", [])]
     img_before = [0]
     for mm in msgs: img_before.append(img_before[-1] + mm["content"].count("<image>"))
-    def pmsgs_upto(k):  # messages [0, k) as parts
+    def pmsgs_upto(k):
         it = iter(imgs[:img_before[k]])
         return [{"role": mm["role"], "content": to_parts(mm["content"], it)} for mm in msgs[:k]]
-    # SPLIT format: a step is TWO assistant messages -- a think-only message
-    # ("<think>...</think>") followed by an action-only message ("<call_tool ...>"
-    # or "<answer>"). At inference they are one turn: think + "\n\n" + action.
+
     na, kind = {}, {}
     for i, mm in enumerate(msgs):
         if mm["role"] != "assistant": continue
@@ -120,16 +100,14 @@ if _skip:
     recs = recs[_skip:]
 with open(outf, "a") as fo:
     for j, r in enumerate(recs):
-        r2 = None   # a record that raises must not leave r2 unbound: the progress
-                    # print below sits OUTSIDE the try and killed two shards with
-                    # NameError the moment a resumed run hit a bad first record.
+        r2 = None
+
         try:
             r2 = process(r)
             if r2: fo.write(json.dumps(r2) + "\n"); fo.flush(); n_ok += 1
         except Exception as e:
             print("  rec %d ERR: %s" % (j, str(e)[:140]), flush=True)
-            # Remember it: the counter below advances regardless, so without this the
-            # record is skipped for good and the arm can never reach full coverage.
+
             open(outf + ".failed", "a").write("%d\n" % (_skip + j))
             try:
                 import torch as _t; _t.cuda.empty_cache()

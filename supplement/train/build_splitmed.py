@@ -1,8 +1,3 @@
-# SPLITMED: the exact SPLITW recipe (native per-message loss_scale, answers 1.5/1.6),
-# with ONE change -- the think-channel mask is replaced by the mediation rule:
-#   keep think_i  iff  na_think_i >= median(na_think)  AND  the next query is kept by cf_query.
-# Thinks newly kept get the median native kept-think weight; thinks newly dropped get 0.
-# Query / answer messages are untouched.
 import json, glob, hashlib, sys, statistics as st, collections
 
 S = "/path/to/work"

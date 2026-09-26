@@ -1,9 +1,3 @@
-"""Scoring. (1) judge_answer: gemini-3.5-flash grades the agent answer vs gold by answer_type
-(verdict/comparison/trend/regime), lenient -- same conclusion/direction matches, paraphrase OK
-(vjudge style). (2) retrieval_hits: rule-based from the search trace -- did any search surface the
-gold doc / exact block (rt.hash, figure) / gold page (rt.page)? For text-tool table questions the
-useful signal is doc_hit + the gold info appearing in a retrieved passage (judged via the answer
-grade, since the agent answered from those passages)."""
 import json
 import gem
 
@@ -42,7 +36,6 @@ PREDICTED ANSWER: {pred}
 First state the gold's KEY specific finding, then decide.
 Output ONLY: {{"gold_key_finding": "<the specific finding the gold makes>", "correct": true or false, "reason": "<one sentence: does PRED state it?>"}}"""
 
-
 def judge_answer(question, gold, pred, answer_type):
     pred = (pred or "").strip()
     if not pred or pred.startswith("ERROR:"):
@@ -54,9 +47,7 @@ def judge_answer(question, gold, pred, answer_type):
     except Exception as e:
         return {"correct": False, "reason": "judge error: " + str(e)[:120]}
 
-
 def retrieval_hits(item, searches):
-    """item = bench entry (has 'doc' + 'rt'); searches = react trace. Returns hit flags."""
     rt_doc = item["doc"]
     rt = item.get("rt", {})
     rt_hash = rt.get("hash")

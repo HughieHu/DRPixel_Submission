@@ -1,18 +1,3 @@
-#!/usr/bin/env python3
-"""TRUE per-token cfw_V3: channel-decomposed weights (pure stdlib, runs on login node).
-Reads cfw_v3_full.shard{0-3}.jsonl. Search-step assistant msgs carry cf_query + cf_think;
-the answer msg carries a scalar loss_scale (=1.5).
-
-Per search-step assistant msg produces BOTH:
-  query_scale  <- EXACT cfw_V1 map on cf_query  (plugin applies it to <call_tool>/action tokens)
-  think_scale  <- independent rank map on cf_think (plugin applies it to <think> tokens)
-answer msg keeps loss_scale (plugin fallback -> uniform 1.5).
-
-query channel (unchanged vs cfw_V1, for a clean think-channel ablation):
-  cf<=1 -> 0.0 (mask ~28%);  cf>1 -> 2*rank01(cf, positives>1) in (0,2]
-think channel (new, NO negatives per V2 lesson):
-  cf<=0 -> 0.0 (mask);       cf>0 -> 2*rank01(cf, positives>0) in (0,2]
-"""
 import json, bisect, glob
 
 SHARDS = sorted(glob.glob("/path/to/vldr/cfw_v3_full.shard*.jsonl"))

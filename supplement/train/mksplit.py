@@ -27,4 +27,4 @@ with open(dst, "w") as out:
             new.append(mm)
         d["messages"] = new; nmsg_out += len(new)
         out.write(json.dumps(d, ensure_ascii=False) + "\n")
-print("  %-26s 行%d  拆分%d条  消息 %d->%d  mode=%s" % (dst.split("/")[-1], n-1 if limit and n>limit else n, nsplit, nmsg_in, nmsg_out, mode))
+print("  %-26s %d lines  %d split  messages %d->%d  mode=%s" % (dst.split("/")[-1], n-1 if limit and n>limit else n, nsplit, nmsg_in, nmsg_out, mode))
